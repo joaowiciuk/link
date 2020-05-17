@@ -15,6 +15,6 @@ func ParseLinks(doc *html.Node) (links []*Link) {
 			links = append(links, LinkFromNode(k))
 		}
 	}
-	VisitAll(doc, fn)
+	VisitAll(BreadthFirst, doc, fn)
 	return
 }

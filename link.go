@@ -21,7 +21,7 @@ func NewLink(href, text string) *Link {
 }
 
 //LinkFromNode build a Link from html.*Node and returns a pointer to it
-func LinkFromNode(inBreadth *html.Node) *Link {
+func LinkFromNode(node *html.Node) *Link {
 	texts := make([]string, 0)
 	var href string
 	fn := func(k *html.Node) {
@@ -35,7 +35,7 @@ func LinkFromNode(inBreadth *html.Node) *Link {
 			}
 		}
 	}
-	VisitAll(inBreadth, fn)
+	VisitAll(DepthFirst, node, fn)
 	return &Link{
 		Href: href,
 		Text: strings.TrimFunc(strings.Join(texts, " "), Trimmer),

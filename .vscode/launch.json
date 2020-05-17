@@ -5,6 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Launch TestVisitAll",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "program": "${workspaceFolder}",
+            "args": [
+                "-test.run",
+                "TestVisitAll"
+            ]
+        },
+        {
             "name": "Launch TestParseLinks",
             "type": "go",
             "request": "launch",
