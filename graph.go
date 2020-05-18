@@ -5,10 +5,10 @@ import "golang.org/x/net/html"
 type Algorithm int
 
 const (
-	// expand the visit frontier in breadth
+	// BreadthFirst expands the visited frontier in breadth first
 	BreadthFirst Algorithm = iota
 
-	// expand the visit frontier in depth
+	// DepthFirst expands the visited frontier in depth first
 	DepthFirst
 )
 
@@ -22,53 +22,37 @@ func VisitAll(algorithm Algorithm, root *html.Node, fn func(*html.Node)) {
 }
 
 func dfs(root *html.Node, fn func(*html.Node)) {
+	stack := make([]*html.Node, 0)
 	visited := make(map[*html.Node]interface{})
-	queue := make([]*html.Node, 0)
-	queue = append(queue, root)
-	fn(root)
-	visited[root] = nil
-	for len(queue) > 0 {
-		front := queue[0]
-		for inBreadth := front.FirstChild; inBreadth != nil; inBreadth = inBreadth.NextSibling {
-			if _, ok := visited[inBreadth]; !ok {
-				fn(inBreadth)
-				visited[inBreadth] = nil
-				queue = append(queue, inBreadth)
-			}
-			for inDepth := inBreadth.FirstChild; inDepth != nil; inDepth = inDepth.FirstChild {
-				if _, ok := visited[inDepth]; !ok {
-					fn(inDepth)
-					visited[inDepth] = nil
-					queue = append(queue, inDepth)
-				}
+	stack = append(stack, root)
+	for len(stack) > 0 {
+		node := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+		if _, ok := visited[node]; !ok {
+			fn(node)
+			visited[node] = nil
+			for child := node.LastChild; child != nil; child = child.PrevSibling {
+				stack = append(stack, child)
 			}
 		}
-		queue = queue[1:]
 	}
 }
 
 func bfs(root *html.Node, fn func(*html.Node)) {
-	visited := make(map[*html.Node]interface{})
 	queue := make([]*html.Node, 0)
-	queue = append(queue, root)
+	visited := make(map[*html.Node]interface{})
 	fn(root)
 	visited[root] = nil
+	queue = append(queue, root)
 	for len(queue) > 0 {
-		front := queue[0]
-		for inDepth := front.FirstChild; inDepth != nil; inDepth = inDepth.FirstChild {
-			if _, ok := visited[inDepth]; !ok {
-				fn(inDepth)
-				visited[inDepth] = nil
-				queue = append(queue, inDepth)
-			}
-			for inBreadth := front.FirstChild; inBreadth != nil; inBreadth = inBreadth.NextSibling {
-				if _, ok := visited[inBreadth]; !ok {
-					fn(inBreadth)
-					visited[inBreadth] = nil
-					queue = append(queue, inBreadth)
-				}
+		node := queue[0]
+		queue = queue[1:]
+		for child := node.FirstChild; child != nil; child = child.NextSibling {
+			if _, ok := visited[child]; !ok {
+				fn(child)
+				visited[child] = nil
+				queue = append(queue, child)
 			}
 		}
-		queue = queue[1:]
 	}
 }

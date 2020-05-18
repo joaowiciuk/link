@@ -14,23 +14,23 @@ func TestParseLinks(t *testing.T) {
 	tests := []struct {
 		name      string
 		args      args
-		wantLinks []*Link
+		wantLinks []Link
 	}{
 		{
 			name: "Example 1",
 			args: args{
 				doc: DocFromFile("./testdata/ex1.html"),
 			},
-			wantLinks: []*Link{NewLink("/other-page", "A link to another page")},
+			wantLinks: []Link{*NewLink("/other-page", "A link to another page")},
 		},
 		{
 			name: "Example 2",
 			args: args{
 				doc: DocFromFile("./testdata/ex2.html"),
 			},
-			wantLinks: []*Link{
-				NewLink("https://www.twitter.com/joncalhoun", "Check me out on twitter"),
-				NewLink("https://github.com/gophercises", "Gophercises is on Github !"),
+			wantLinks: []Link{
+				*NewLink("https://www.twitter.com/joncalhoun", "Check me out on twitter"),
+				*NewLink("https://github.com/gophercises", "Gophercises is on Github !"),
 			},
 		},
 		{
@@ -38,10 +38,10 @@ func TestParseLinks(t *testing.T) {
 			args: args{
 				doc: DocFromFile("./testdata/ex3.html"),
 			},
-			wantLinks: []*Link{
-				NewLink("#", "Login"),
-				NewLink("/lost", "Lost? Need help?"),
-				NewLink("https://twitter.com/marcusolsson", "@marcusolsson"),
+			wantLinks: []Link{
+				*NewLink("#", "Login"),
+				*NewLink("/lost", "Lost? Need help?"),
+				*NewLink("https://twitter.com/marcusolsson", "@marcusolsson"),
 			},
 		},
 		{
@@ -49,15 +49,20 @@ func TestParseLinks(t *testing.T) {
 			args: args{
 				doc: DocFromFile("./testdata/ex4.html"),
 			},
-			wantLinks: []*Link{
-				NewLink("/dog-cat", "dog cat"),
+			wantLinks: []Link{
+				*NewLink("/dog-cat", "dog cat"),
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotLinks := ParseLinks(tt.args.doc); !reflect.DeepEqual(gotLinks, tt.wantLinks) {
-				t.Errorf("ParseLinks() = %v, want %v", gotLinks, tt.wantLinks)
+			gotLinks := ParseLinks(tt.args.doc)
+			links := make([]Link, 0)
+			for _, link := range gotLinks {
+				links = append(links, *link)
+			}
+			if !reflect.DeepEqual(links, tt.wantLinks) {
+				t.Errorf("ParseLinks() = %v, want %v", links, tt.wantLinks)
 			}
 		})
 	}

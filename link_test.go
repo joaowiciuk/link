@@ -15,22 +15,18 @@ func TestLinkFromNode(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want *Link
+		want Link
 	}{
 		{
 			name: "test 1",
 			args: args{
-				node: &html.Node{
-					Type: html.ElementNode,
-					Data: "a",
-					Attr: []html.Attribute{{Key: "href", Val: "/other-page"}},
-					FirstChild: &html.Node{
-						Type: html.TextNode,
-						Data: "A link to another page",
-					},
-				},
+				node: func() *html.Node {
+					s := `<a href="/other-page">A link to another page</a>`
+					doc, _ := html.Parse(strings.NewReader(s))
+					return doc.FirstChild.FirstChild.NextSibling.FirstChild
+				}(),
 			},
-			want: &Link{
+			want: Link{
 				Href: "/other-page",
 				Text: "A link to another page",
 			},
@@ -38,17 +34,16 @@ func TestLinkFromNode(t *testing.T) {
 		{
 			name: "test 2",
 			args: args{
-				node: &html.Node{
-					Type: html.ElementNode,
-					Data: "a",
-					Attr: []html.Attribute{{Key: "href", Val: "https://www.twitter.com/joncalhoun"}},
-					FirstChild: &html.Node{
-						Type: html.TextNode,
-						Data: "Check me out on twitter",
-					},
-				},
+				node: func() *html.Node {
+					s := `<a href="https://www.twitter.com/joncalhoun">
+					Check me out on twitter
+					<i class="fa fa-twitter" aria-hidden="true"></i>
+				  </a>`
+					doc, _ := html.Parse(strings.NewReader(s))
+					return doc.FirstChild.FirstChild.NextSibling.FirstChild
+				}(),
 			},
-			want: &Link{
+			want: Link{
 				Href: "https://www.twitter.com/joncalhoun",
 				Text: "Check me out on twitter",
 			},
@@ -64,7 +59,7 @@ func TestLinkFromNode(t *testing.T) {
 					return doc.FirstChild.FirstChild.NextSibling.FirstChild
 				}(),
 			},
-			want: &Link{
+			want: Link{
 				Href: "https://github.com/gophercises",
 				Text: "Gophercises is on Github !",
 			},
@@ -78,7 +73,7 @@ func TestLinkFromNode(t *testing.T) {
 					return doc.FirstChild.FirstChild.NextSibling.FirstChild
 				}(),
 			},
-			want: &Link{
+			want: Link{
 				Href: "#",
 				Text: "Login",
 			},
@@ -92,7 +87,7 @@ func TestLinkFromNode(t *testing.T) {
 					return doc.FirstChild.FirstChild.NextSibling.FirstChild
 				}(),
 			},
-			want: &Link{
+			want: Link{
 				Href: "/dog-cat",
 				Text: "dog cat",
 			},
@@ -100,7 +95,7 @@ func TestLinkFromNode(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := LinkFromNode(tt.args.node); !reflect.DeepEqual(got, tt.want) {
+			if got := *LinkFromNode(tt.args.node); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("LinkFromNode() = %v, want %v", got, tt.want)
 			}
 		})
